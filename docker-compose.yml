@@ -1,0 +1,167 @@
+# =============================================================================
+# LMS Blueprint — Root Docker Compose
+# "One-Click" Local Development Orchestration
+# =============================================================================
+#
+# Services:
+#   backend   — Laravel 8 PHP-FPM API (port 8000)
+#   frontend  — Vue.js 2 dev server (port 8080)
+#   db        — MySQL 8 database (port 3306)
+#   redis     — Redis 6 for queue & cache (port 6379)
+#   nginx     — Reverse proxy (port 80)
+#
+# Quick Start:
+#   1. cp lms-backend/.env.example lms-backend/.env
+#   2. cp lms-frontend/startup-campus/.env.example lms-frontend/startup-campus/.env
+#   3. docker-compose up -d
+#   4. docker-compose exec backend php artisan key:generate
+#   5. docker-compose exec backend php artisan migrate --seed
+#   Open http://localhost in your browser
+# =============================================================================
+
+version: "3.9"
+
+networks:
+  lms-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  redis-data:
+
+services:
+  # ---------------------------------------------------------------------------
+  # Laravel Backend (PHP-FPM 8.1)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./lms-backend
+      dockerfile: Dockerfile
+      target: base
+    container_name: lms-backend
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./lms-backend:/var/www/html
+      - /var/www/html/vendor           # Preserve container-built vendor
+    ports:
+      - "8000:80"
+    env_file:
+      - ./lms-backend/.env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      SESSION_DRIVER: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - lms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/up"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---------------------------------------------------------------------------
+  # Vue.js Frontend (Node 18 LTS dev server)
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: node:18-alpine
+    container_name: lms-frontend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./lms-frontend/startup-campus:/app
+      - /app/node_modules                 # Preserve container-built modules
+    ports:
+      - "8080:8080"
+    environment:
+      VUE_APP_API_BASE_URL: "http://localhost:8000"
+      VUE_APP_STORAGE_BASE_URL: "http://localhost:8000/storage/"
+      # Allow hot-reload to reach host
+      CHOKIDAR_USEPOLLING: "true"
+    command: sh -c "npm install && npm run serve -- --host 0.0.0.0 --port 8080"
+    depends_on:
+      - backend
+    networks:
+      - lms-network
+
+  # ---------------------------------------------------------------------------
+  # MySQL 8 Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: lms-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-secret}"
+      MYSQL_DATABASE: "${DB_DATABASE:-lms_blueprint}"
+      MYSQL_USER: "${DB_USERNAME:-lms_user}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-secret}"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - lms-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis 6 (Queue & Cache)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:6-alpine
+    container_name: lms-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - lms-network
+
+  # ---------------------------------------------------------------------------
+  # Nginx Reverse Proxy (routes / → Vue, /api → Laravel)
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: lms-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - lms-network
+
+  # ---------------------------------------------------------------------------
+  # phpMyAdmin (optional DB GUI — http://localhost:8081)
+  # ---------------------------------------------------------------------------
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: lms-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: "${DB_PASSWORD:-secret}"
+    depends_on:
+      - db
+    networks:
+      - lms-network
