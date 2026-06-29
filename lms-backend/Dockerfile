@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     unzip \
+    git \
     && docker-php-ext-install pdo_mysql zip gd
 
 # Install Composer
@@ -19,16 +20,12 @@ WORKDIR /var/www/html
 # Copy your Laravel application code into the container
 COPY . /var/www/html
 
-# Disable HTTP/2 to prevent HTTP/2 400 errors during download
-RUN composer config --global http-basic.github.com || true
-
-# Set HTTP version via Environment Variable to prevent HTTP/2 400 download errors
+# Disable HTTP/2 and use git source downloads for stability
 ENV COMPOSER_HTTP_VERSION=1.1
 ENV CURL_HTTP_VERSION=1.1
-ENV COMPOSER_TRANSPORT_OPTIONS="ssl.verify_peer=false"
 
-# Install PHP dependencies using Composer (production only)
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+# Install PHP dependencies using Git source clones to bypass HTTP/2 zip downloads
+RUN composer install --no-dev --no-interaction --prefer-source --optimize-autoloader
 
 # Copy the startup script into the container
 COPY entrypoint.sh /usr/local/bin/
