@@ -19,16 +19,6 @@
 #   Open http://localhost in your browser
 # =============================================================================
 
-version: "3.9"
-
-networks:
-  lms-network:
-    driver: bridge
-
-volumes:
-  db-data:
-  redis-data:
-
 services:
   # ---------------------------------------------------------------------------
   # Laravel Backend (PHP-FPM 8.1)
@@ -37,7 +27,6 @@ services:
     build:
       context: ./lms-backend
       dockerfile: Dockerfile
-      target: base
     container_name: lms-backend
     restart: unless-stopped
     working_dir: /var/www/html
@@ -165,3 +154,12 @@ services:
       - db
     networks:
       - lms-network
+
+networks:
+  lms-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  redis-data:
+
