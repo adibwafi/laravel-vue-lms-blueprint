@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <!--[if !mso]><!-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <title>TITLE HERE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;700&display=swap" rel="stylesheet">
+
+    <style type="text/css">
+        body {
+            font-family: 'Sora', sans-serif;
+        }
+    </style>
+</head>
+
+<body style="margin:0;padding:0;word-spacing:normal;background-color:#fff;">
+
+    <div role="article" aria-roledescription="email" lang="en"
+        style="-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;background-color:#f5f9ff;">
+        <table width="100%" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+            <tr>
+                <td align="center">
+                    <div class="outer" style="width:100%;max-width:414px;margin:auto; padding: 30px 0;">
+
+                        <table role="presentation" width="100%"
+                            style="border-spacing: 0;border-collapse: separate; background:#fff; background-size: cover; background-repeat: no-repeat; background-position: center;"
+                            width="100%" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="padding: 20px">
+                                    <div
+                                        style="font-weight: 700;font-size: 36px;line-height: 45px;color: #2B2C27; margin-bottom: 24px; padding-top: 70px;">
+                                        Reset Your<br>Password</div>
+                                    <div style="font-weight: 400; font-size: 14px; color: #2B2C27;">Kamu menerima email ini karena ada permintaan atur ulang kata sandi akun Startup Campus kamu. Tekan tombol di bawah
+                                    untuk mengatur ulang kata sandi Anda.</div>
+                                    <!-- Code OTP here -->
+                                    <div
+                                        style="padding: 20px; text-align: center; background: #0056D2; border-radius: 20px; font-weight: 700; font-size: 40px; color: #fff; margin: 24px 0 60px;">
+                                        {{ $details['otp'] }}</div>
+                                    <!-- end: Code OTP here -->
+                                    <!-- Nanti ada link disini tapi nunggu design -->
+                                    klik <a href="{{ $details['url'] }}">tautan ini</a> untuk memverifikasi akun kamu
+                                    <!-- end: Nanti ada link disini tapi nunggu design -->
+                                    <div style="font-weight: 400; font-size: 14px; color: #2B2C27;margin-bottom: 24px;">
+                                        Tautan ini akan berakhir dalam 2 hari.</div>
+                                    <div style="font-weight: 400; font-size: 14px;color: rgba(43, 44, 39, 0.5);">Jika kamu tidak menerima pesan ini, silahkan abaikan.</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 20px;">
+                                    <div
+                                        style="font-weight: 400; font-size: 13px;color: rgba(43, 44, 39, 0.5);border-top: 1px solid #757575; padding: 40px 0;">
+                                        ©Startup Campus.<br>
+                                        All right reserverd, 2022.</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>
