@@ -22,9 +22,11 @@ COPY . /var/www/html
 # Disable HTTP/2 to prevent HTTP/2 400 errors during download
 RUN composer config --global http-basic.github.com || true
 
+# Set HTTP version via Environment Variable to prevent HTTP/2 400 download errors
+ENV COMPOSER_HTTP_VERSION=1.1
+
 # Install PHP dependencies using Composer (production only)
-RUN composer config --global net.curl_options '{"CURLOPT_HTTP_VERSION": 1}' && \
-    composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # Copy the startup script into the container
 COPY entrypoint.sh /usr/local/bin/
