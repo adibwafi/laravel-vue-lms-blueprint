@@ -1,0 +1,32 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+nginx/logs/
+
+# Sensitive files — never commit real .env files
+lms-backend/.env
+lms-backend/.env.testing
+lms-frontend/startup-campus/.env
+
+# Node
+lms-frontend/startup-campus/node_modules/
+lms-frontend/startup-campus/dist/
+
+# PHP
+lms-backend/vendor/
+lms-backend/storage/logs/*.log
+lms-backend/storage/framework/cache/data/*
+lms-backend/storage/framework/sessions/*
+lms-backend/storage/framework/views/*
+lms-backend/bootstrap/cache/*.php
+
+# MySQL data (from backend docker-compose)
+lms-backend/data/
