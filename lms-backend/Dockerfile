@@ -24,6 +24,8 @@ RUN composer config --global http-basic.github.com || true
 
 # Set HTTP version via Environment Variable to prevent HTTP/2 400 download errors
 ENV COMPOSER_HTTP_VERSION=1.1
+ENV CURL_HTTP_VERSION=1.1
+ENV COMPOSER_TRANSPORT_OPTIONS="ssl.verify_peer=false"
 
 # Install PHP dependencies using Composer (production only)
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
