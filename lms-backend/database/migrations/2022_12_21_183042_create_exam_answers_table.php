@@ -15,9 +15,9 @@ class CreateExamAnswersTable extends Migration
     {
         Schema::create('exam_answers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('exam_id');
-            $table->string('user_id');
-            $table->string('exam_page_id');
+            $table->uuid('exam_id');
+            $table->uuid('user_id');
+            $table->uuid('exam_page_id');
             $table->json('data_answer');
             $table->timestamps();
         });

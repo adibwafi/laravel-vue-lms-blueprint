@@ -15,8 +15,8 @@ class CreateUserCourseCategoriesTable extends Migration
     {
         Schema::create('user_course_categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('course_category_id');
-            $table->string('user_id');
+            $table->uuid('course_category_id');
+            $table->uuid('user_id');
             $table->timestamps();
         });
 

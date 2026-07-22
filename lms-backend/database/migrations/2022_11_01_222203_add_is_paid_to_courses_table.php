@@ -14,7 +14,7 @@ class AddIsPaidToCoursesTable extends Migration
     public function up()
     {
         Schema::table('courses', function (Blueprint $table) {
-            $table->integer('isPaid')->after('status');
+            $table->boolean('isPaid')->default(false)->after('status');
         });
     }
 

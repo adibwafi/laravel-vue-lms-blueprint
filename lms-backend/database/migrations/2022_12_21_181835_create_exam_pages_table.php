@@ -15,7 +15,7 @@ class CreateExamPagesTable extends Migration
     {
         Schema::create('exam_pages', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('exam_id');
+            $table->uuid('exam_id');
             $table->string('name');
             $table->integer('order');
             $table->json('data');

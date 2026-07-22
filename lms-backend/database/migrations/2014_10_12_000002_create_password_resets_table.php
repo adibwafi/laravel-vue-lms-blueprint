@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('user_reset_passwords', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('users_id');
+            $table->uuid('users_id');
             $table->dateTime('expired_at')->nullable();
             $table->softDeletes();
             $table->timestamps();

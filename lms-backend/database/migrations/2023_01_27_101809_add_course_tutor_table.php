@@ -14,8 +14,8 @@ class AddCourseTutorTable extends Migration
     public function up()
     {
         Schema::create('course_tutor', function (Blueprint $table) {
-            $table->string('course_id');
-            $table->string('tutor_id');
+            $table->uuid('course_id');
+            $table->uuid('tutor_id');
             $table->foreign('course_id')->references('id')->on('courses');
             $table->foreign('tutor_id')->references('id')->on('tutors');
         });

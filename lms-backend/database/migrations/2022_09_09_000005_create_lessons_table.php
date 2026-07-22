@@ -15,7 +15,7 @@ class CreateLessonsTable extends Migration
     {
         Schema::create('lessons', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('courses_id');
+            $table->uuid('courses_id');
             $table->string('name');
             $table->string('learn_time');
             $table->integer('sorter');

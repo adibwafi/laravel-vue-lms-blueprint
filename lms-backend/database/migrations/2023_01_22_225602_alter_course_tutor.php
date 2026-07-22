@@ -16,8 +16,8 @@ class AlterCourseTutor extends Migration
     Schema::dropIfExists('course_tutor');
 
     Schema::create('course_tutor', function (Blueprint $table) {
-      $table->string('course_category_id');
-      $table->string('tutor_id');
+      $table->uuid('course_category_id');
+      $table->uuid('tutor_id');
       $table->foreign('course_category_id')->references('id')->on('course_categories')
         ->onDelete('cascade');
       $table->foreign('tutor_id')->references('id')->on('tutors')

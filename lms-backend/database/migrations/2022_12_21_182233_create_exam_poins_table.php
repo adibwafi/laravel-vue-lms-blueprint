@@ -15,8 +15,8 @@ class CreateExamPoinsTable extends Migration
     {
         Schema::create('exam_poins', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('exam_id');
-            $table->string('user_id');
+            $table->uuid('exam_id');
+            $table->uuid('user_id');
             $table->decimal('poin');
             $table->dateTime('finished_at')->nullable();
             $table->timestamps();

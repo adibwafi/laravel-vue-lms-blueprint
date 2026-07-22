@@ -15,8 +15,8 @@ class CreateUserCoursesTable extends Migration
     {
         Schema::create('user_courses', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('courses_id');
-            $table->string('users_id');
+            $table->uuid('courses_id');
+            $table->uuid('users_id');
             $table->dateTime('completed_at')->nullable();
             $table->softDeletes();
             $table->timestamps();

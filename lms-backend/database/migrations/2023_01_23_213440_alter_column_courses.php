@@ -14,7 +14,7 @@ class AlterColumnCourses extends Migration
   public function up()
   {
     Schema::table('courses', function (Blueprint $table) {
-      $table->string('price')->nullable()->default('0')->change();
+      $table->bigInteger('price')->nullable()->default(0)->change();
       $table->string('link_payment')->nullable()->default('#')->change();
     });
   }

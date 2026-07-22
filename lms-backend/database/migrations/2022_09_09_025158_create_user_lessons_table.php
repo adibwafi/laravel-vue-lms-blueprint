@@ -15,9 +15,9 @@ class CreateUserLessonsTable extends Migration
     {
         Schema::create('user_lessons', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('courses_id');
-            $table->string('lessons_id');
-            $table->string('users_id');
+            $table->uuid('courses_id');
+            $table->uuid('lessons_id');
+            $table->uuid('users_id');
             $table->softDeletes();
             $table->timestamps();
         });

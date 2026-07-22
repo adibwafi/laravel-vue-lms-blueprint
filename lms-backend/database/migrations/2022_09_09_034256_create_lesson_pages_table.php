@@ -15,7 +15,7 @@ class CreateLessonPagesTable extends Migration
     {
         Schema::create('lesson_pages', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('lessons_id');
+            $table->uuid('lessons_id');
             $table->string('name');
             $table->string('type_content');
             $table->integer('sorter');

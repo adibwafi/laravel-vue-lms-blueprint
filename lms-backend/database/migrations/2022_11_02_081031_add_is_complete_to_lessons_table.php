@@ -14,7 +14,7 @@ class AddIsCompleteToLessonsTable extends Migration
     public function up()
     {
         Schema::table('lessons', function (Blueprint $table) {
-            $table->integer('isCompleted');
+            $table->boolean('isCompleted')->default(false);
         });
     }
 

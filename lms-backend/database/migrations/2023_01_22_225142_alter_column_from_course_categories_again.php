@@ -16,8 +16,8 @@ class AlterColumnFromCourseCategoriesAgain extends Migration
     Schema::dropIfExists('course_tutor');
 
     Schema::create('course_tutor', function (Blueprint $table) {
-      $table->string('course_categories_id');
-      $table->string('tutors_id');
+      $table->uuid('course_categories_id');
+      $table->uuid('tutors_id');
       $table->foreign('course_categories_id')->references('id')->on('course_categories')
         ->onDelete('cascade');
       $table->foreign('tutors_id')->references('id')->on('tutors')

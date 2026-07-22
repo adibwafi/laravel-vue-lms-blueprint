@@ -15,11 +15,11 @@ class CreateUserLessonAnswersTable extends Migration
     {
         Schema::create('user_lesson_answers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('courses_id');
-            $table->string('lessons_id');
-            $table->string('users_id');
-            $table->string('lesson_pages_id');
-            $table->json('answer');
+            $table->uuid('courses_id');
+            $table->uuid('lessons_id');
+            $table->uuid('users_id');
+            $table->uuid('lesson_pages_id');
+            $table->string('answer')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

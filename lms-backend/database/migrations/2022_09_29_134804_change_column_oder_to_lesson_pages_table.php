@@ -15,7 +15,7 @@ class ChangeColumnOderToLessonPagesTable extends Migration
     {
         Schema::table('lesson_pages', function (Blueprint $table) {
             $table->dropColumn('order');
-            $table->string('sorter')->after('tooltips');
+            $table->integer('sorter')->after('tooltips');
         });
     }
 

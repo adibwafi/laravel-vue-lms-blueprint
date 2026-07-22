@@ -15,8 +15,8 @@ class CreateLessonPageRatingsTable extends Migration
     {
         Schema::create('lesson_page_ratings', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('lesson_pages_id');
-            $table->string('users_id');
+            $table->uuid('lesson_pages_id');
+            $table->uuid('users_id');
             $table->integer('rating');
             $table->text('feedback');
             $table->softDeletes();
