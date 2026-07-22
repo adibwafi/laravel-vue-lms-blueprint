@@ -21,12 +21,19 @@ class BaseFactory extends Factory
         $random_image_path = sprintf("random-image/%dx%d", $width, $height);
         $files = Config::get($random_image_path);
         if (!$files) {
-            $files = Storage::disk('s3')->allFiles($random_image_path);
+            try {
+                $files = Storage::disk('s3')->allFiles($random_image_path);
+            } catch (\Throwable $e) {
+                $files = [];
+            }
+            if (empty($files)) {
+                $files = ["https://picsum.photos/{$width}/{$height}"];
+            }
             Config::set($random_image_path, $files);
         }
 
         if (count($files) == 0) {
-            throw new Exception(sprintf("There is no files with width %d, height %d", $width, $height), 1);
+            return "https://picsum.photos/{$width}/{$height}";
         }
         return $this->faker->randomElement($files);
     }

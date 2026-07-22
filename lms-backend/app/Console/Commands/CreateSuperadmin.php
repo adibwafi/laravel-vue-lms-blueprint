@@ -47,6 +47,7 @@ class CreateSuperadmin extends Command
         $user = User::whereEmail('superadmin@email.com')->first();
         if (!empty($user)) {
             $this->info("Superadmin already exist!");
+            return 0;
         }
         try {
             DB::beginTransaction();
@@ -57,11 +58,12 @@ class CreateSuperadmin extends Command
                 'status' => 'active',
                 'email_verified_at' => Carbon::now(),
             ]);
-            $sa = Role::create(['name' => 'Super-Admin']);
+            $sa = Role::findOrCreate('Super-Admin');
             $user->assignRole($sa);
             DB::commit();
             $this->info("Success create superadmin!");
         } catch (\Throwable $th) {
+            DB::rollBack();
             Log::error($th);
         }
     }

@@ -206,15 +206,16 @@ class DatabaseSeeder extends Seeder
 
     private function simulateUserDoExam($exam, $number_do_exam, $randomUserIds)
     {
+        $number_do_exam = min($number_do_exam, 2);
         for ($i = 0; $i < $number_do_exam; $i++) {
             $exam_pages = $exam->examPage()->get();
             $number_of_exam_pages = $exam_pages->count();
 
             $max_attempt = $exam->max_attempt;
             if ($max_attempt) {
-                $number_attempt_by_user = random_int(1, $max_attempt);
+                $number_attempt_by_user = 1;
             } else {
-                $number_attempt_by_user = random_int(1, 5);
+                $number_attempt_by_user = 1;
             }
             for ($j = 0; $j < $number_attempt_by_user; $j++) {
                 $start_time = now()->addHour(random_int(1, 48))->addMinutes(random_int(0, 60));
@@ -244,7 +245,7 @@ class DatabaseSeeder extends Seeder
         $this->log("Starting Simulate User Activity\n");
         foreach ($course_categories as $course_category) {
             $this->log("Simulating course category " . $course_category->name . " activity\n");
-            $random_course_category_students_count = random_int(50, 100);
+            $random_course_category_students_count = random_int(2, 4);
             $getIdFunc = function ($item) {
                 return $item->id;
             };
@@ -325,7 +326,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->PopulateImage();
+        try {
+            $this->PopulateImage();
+        } catch (\Throwable $e) {
+            $this->log("Skipping PopulateImage (S3 not configured): " . $e->getMessage() . "\n");
+        }
         $prakerja_pretest_course = Course::factory([
             'name' => 'Pre-Test',
             'order' => -100,
@@ -439,32 +444,46 @@ class DatabaseSeeder extends Seeder
             });
 
         $this->log("Creating Prakerja Course Category\n");
-        $prakerja_course_category = CourseCategory::factory()->prakerja()->count(3)->hasTutor(rand(1, 4))->has(
+        $prakerja_course_category = CourseCategory::factory()->prakerja()->count(2)->hasTutor(rand(1, 2))->has(
             $prakerja_pretest_course
         )->has(
-            Course::factory()->prakerja()->hasTutor(rand(1, 3))->has(
+            Course::factory()->prakerja()->hasTutor(rand(1, 2))->has(
                 $prakerja_random_lesson_zoom
             )->has(
                 $prakerja_random_lesson_content
             )->has(
                 $prakerja_random_lesson_quiz
-            )->count(3)
+            )->count(2)
         )->has($prakerja_posttest_course)->create();
         $this->log("Finish Creating Prakerja Course Category\n");
 
         $this->log("Creating Non Prakerja Course Category\n");
-        $nonprakerja_course_category = CourseCategory::factory()->nonPrakerja()->count(5)->hasTutor(rand(1, 4))->has(
-            Course::factory()->nonPrakerja()->hasTutor(rand(1, 3))->has(
-                $prakerja_random_lesson_content->count(rand(2, 4))
-            )->count(random_int(3, 5))
+        $nonprakerja_course_category = CourseCategory::factory()->nonPrakerja()->count(2)->hasTutor(rand(1, 2))->has(
+            Course::factory()->nonPrakerja()->hasTutor(rand(1, 2))->has(
+                $prakerja_random_lesson_content->count(rand(1, 2))
+            )->count(2)
         )->create();
         $this->log("Finish Creating Non Prakerja Course Category\n");
         BannerPromotion::factory()->count(rand(3, 5))->create();
         ExamConfig::factory()->create();
         Artisan::call('create:superadmin');
 
+        // Create explicit demo Learner account for testing
+        $learnerRole = \Spatie\Permission\Models\Role::findOrCreate('user');
+        $demoUser = User::whereEmail('learner@email.com')->first();
+        if (!$demoUser) {
+            $demoUser = User::create([
+                'fullname' => 'Demo Learner',
+                'email' => 'learner@email.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('Password123123'),
+                'status' => 'active',
+                'email_verified_at' => \Illuminate\Support\Carbon::now(),
+            ]);
+            $demoUser->assignRole($learnerRole);
+        }
+
         $this->log("Creating User\n");
-        $user = User::factory()->count(500)->create();
+        $user = User::factory()->count(30)->create();
         $this->log("Finish Creating User\n");
         $this->simulateUserActivity($prakerja_course_category, $user);
         $this->simulateUserActivity($nonprakerja_course_category, $user);
