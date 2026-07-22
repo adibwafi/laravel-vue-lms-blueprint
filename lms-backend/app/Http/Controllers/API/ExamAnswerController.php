@@ -181,10 +181,11 @@ class ExamAnswerController extends BaseController
           ->whereRaw('e.lesson_id = ?', [$lesson_id]);
 
         if ($request->search) {
-          $query->whereRaw('(u.fullname LIKE \'%' . $request->search . '%\' OR u.email LIKE \'%' . $request->search . '%\')');
+          $searchTerm = '%' . strtolower($request->search) . '%';
+          $query->whereRaw('(LOWER(u.fullname) LIKE ? OR LOWER(u.email) LIKE ?)', [$searchTerm, $searchTerm]);
         }
 
-        $data = new PaginationResource($query->groupBy('user_id')
+        $data = new PaginationResource($query->groupBy('ea.user_id', 'u.fullname', 'u.email')
           ->orderByRaw('MAX(ea.created_at) desc')
           ->paginate($request->limit));
 
