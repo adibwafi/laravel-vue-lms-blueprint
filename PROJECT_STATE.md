@@ -12,7 +12,7 @@ Production-grade Learning Management System (LMS) blueprint designed for scaled 
 | **Backend Framework** | Laravel `^8.75` (PHP `^7.3 \| ^8.0`) | RESTful API controllers (`App\Http\Controllers\API`), Eloquent ORM, Form Requests, Sanctum Auth |
 | **Frontend Framework** | Vue.js `^2.6.14` | SPA powered by Vue CLI 5, JavaScript ES6+, Options API |
 | **UI Library** | Vuetify `^2.6.0` | Material Design UI framework with custom SASS configuration |
-| **Database** | MySQL `8.0` | Relational storage for users, courses, lessons, exams, vouchers, and certificates |
+| **Database** | MySQL `8.0` / PostgreSQL (Supabase) | Dual-driver support for local MySQL 8.0 or cloud-hosted Supabase PostgreSQL |
 | **Cache & Queue** | Redis `6.x` | Used for caching API responses, session storage, and processing asynchronous jobs |
 | **Authentication** | Laravel Sanctum `^2.15` | Bearer token authentication stored via HTTP-only cookies / local storage |
 | **Role & Permissions** | Spatie Laravel Permission `^5.5` | RBAC roles: `Super-Admin`, `Admin`, `Expert`, `Learner` |
