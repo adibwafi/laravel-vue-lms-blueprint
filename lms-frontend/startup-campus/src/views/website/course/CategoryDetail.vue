@@ -491,7 +491,12 @@ export default {
   },
   methods: {
     getTimeExam() {
-      this.$root
+      const cached = localStorage.getItem("timeExam");
+      if (cached) {
+        this.timeExam = cached;
+        return Promise.resolve(cached);
+      }
+      return this.$root
         .axios({
           method: "get",
           url: `/v1/exam-config`,
@@ -500,6 +505,7 @@ export default {
           // console.log("time", res);
           if (!res.data.error) {
             this.timeExam = res.data.data.ExamConfig.time_exam;
+            localStorage.setItem("timeExam", this.timeExam);
             return;
           }
         })
@@ -782,9 +788,11 @@ export default {
     this.userId = this.$root.userId();
     if (this.$root.token()) {
       if (id) {
-        await this.getCourse(id);
-        await this.readCourse(id);
-        await this.getTimeExam();
+        await Promise.all([
+          this.getCourse(id),
+          this.readCourse(id),
+          this.getTimeExam(),
+        ]);
       }
     }
   },

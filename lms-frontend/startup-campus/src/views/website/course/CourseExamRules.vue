@@ -244,20 +244,25 @@ export default {
         .catch((e) => {
           console.log(e);
         })
-        .finally(() => {
+.finally(() => {
           this.loadScreen = false;
         });
     },
     getTimeExam() {
-      this.$root
+      const cached = localStorage.getItem("timeExam");
+      if (cached) {
+        this.timeExam = cached;
+        return Promise.resolve(cached);
+      }
+      return this.$root
         .axios({
           method: "get",
           url: `/v1/exam-config`,
         })
         .then((res) => {
-          // console.log(res);
           if (!res.data.error) {
             this.timeExam = res.data.data.ExamConfig.time_exam;
+            localStorage.setItem("timeExam", this.timeExam);
             return;
           }
         })
