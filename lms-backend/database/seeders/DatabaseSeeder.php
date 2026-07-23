@@ -468,8 +468,23 @@ class DatabaseSeeder extends Seeder
         ExamConfig::factory()->create();
         Artisan::call('create:superadmin');
 
-        // Create explicit demo Learner account for testing
+        $superAdminRole = \Spatie\Permission\Models\Role::findOrCreate('Super-Admin');
         $learnerRole = \Spatie\Permission\Models\Role::findOrCreate('user');
+
+        // Create explicit Recruiter / Admin demo account
+        $recruiterUser = User::whereEmail('recruiter@email.com')->first();
+        if (!$recruiterUser) {
+            $recruiterUser = User::create([
+                'fullname' => 'Recruiter Demo Evaluator',
+                'email' => 'recruiter@email.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('Password123123'),
+                'status' => 'active',
+                'email_verified_at' => \Illuminate\Support\Carbon::now(),
+            ]);
+            $recruiterUser->assignRole($superAdminRole);
+        }
+
+        // Create explicit Learner demo account
         $demoUser = User::whereEmail('learner@email.com')->first();
         if (!$demoUser) {
             $demoUser = User::create([
