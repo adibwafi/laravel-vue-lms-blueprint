@@ -123,6 +123,13 @@ export default {
   }),
   methods: {
     getProfile() {
+      const cachedUser = this.$root.user();
+      if (cachedUser && (cachedUser.fullname || cachedUser.email)) {
+        this.data = cachedUser;
+        if (this.data.image)
+          this.image = this.$root.storageBaseURL + this.data.image;
+        return;
+      }
       this.isLoading = true;
       this.$root
         .axios({
@@ -133,6 +140,7 @@ export default {
           // console.log(res);
           if (res.data.success) {
             this.data = res.data.data.me;
+            this.$root.user(this.data);
             if (this.data.image)
               this.image = this.$root.storageBaseURL + this.data.image;
             this.isLoading = false;
