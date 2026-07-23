@@ -35,6 +35,17 @@ class BaseController extends Controller
         ], 200);
     }
 
+    public function ressException(\Throwable $th, string $defaultMessage = 'An unexpected server error occurred.')
+    {
+        Log::error($th);
+        return response()->json([
+            'success' => false,
+            'message' => config('app.debug') ? $th->getMessage() : $defaultMessage,
+            'code' => 1,
+            'data' => [],
+        ], 200);
+    }
+
     public function sendOTP($input)
     {
         Mail::to($input['email'])->send(new \App\Mail\OtpMail([

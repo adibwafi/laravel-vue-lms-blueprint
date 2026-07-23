@@ -24,9 +24,9 @@ return [
 
   'allowed_methods' => ['*'],
 
-  'allowed_origins' => ['*'],
+  'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS', env('FRONTEND_URL', 'http://localhost:8080,http://localhost:3000,http://localhost'))),
 
-  'allowed_origins_patterns' => [],
+  'allowed_origins_patterns' => ['*.vercel.app', '*.netlify.app', '*.onrender.com'],
 
   'allowed_headers' => ['*'],
 

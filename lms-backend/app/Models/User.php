@@ -137,14 +137,16 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         if ($data->search) {
-            array_push($this->fillable, "id");
-            for ($i = 0; $i < count($this->fillable); $i++) {
-                if ($i == 0) {
-                    $query->where($this->fillable[$i], 'like', '%' . $data->search . '%');
-                } else {
-                    $query->orWhere($this->fillable[$i], 'like', '%' . $data->search . '%');
+            $searchFields = ['id', 'fullname', 'email', 'phone'];
+            $query->where(function ($q) use ($data, $searchFields) {
+                foreach ($searchFields as $i => $field) {
+                    if ($i === 0) {
+                        $q->where($field, 'like', '%' . $data->search . '%');
+                    } else {
+                        $q->orWhere($field, 'like', '%' . $data->search . '%');
+                    }
                 }
-            }
+            });
         }
 
         if ($data->sortBy || $data->orderBy) {
