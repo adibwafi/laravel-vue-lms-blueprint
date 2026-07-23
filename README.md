@@ -272,14 +272,24 @@ docker-compose exec backend php artisan migrate --seed
 docker-compose exec backend php artisan create:superadmin
 ```
 
-### 5. Access the application
+### 5. Access the Application & Recruiter Demo Credentials
 
-| Service | URL | Credentials |
+#### 🌐 Service Endpoints
+| Service | URL | Note |
 |---|---|---|
-| **Frontend** (Vue) | http://localhost | — |
-| **Backend API** | http://localhost:8000 | — |
-| **API via Nginx** | http://localhost/api | — |
-| **phpMyAdmin** | http://localhost:8081 | root / secret |
+| **Frontend** (Vue SPA) | http://localhost | Main student & admin portal |
+| **Backend API** | http://localhost:8000 | Direct API base |
+| **API via Nginx** | http://localhost/api | Reverse proxied API |
+| **phpMyAdmin** | http://localhost:8081 | DB management (root / secret) |
+
+#### 🔑 Recruiter & Evaluator Demo Credentials
+| Role / Persona | Email | Password | Access & Capabilities |
+|---|---|---|---|
+| **Recruiter / Evaluator (Admin)** | `recruiter@email.com` | `Password123123` | Full CMS admin dashboard, user tracking, course & exam creation |
+| **Super Admin** | `superadmin@email.com` | `Password123123` | System management & full RBAC privileges |
+| **Demo Learner (Student)** | `learner@email.com` | `Password123123` | Student course catalog, video lesson player, randomized exam engine |
+
+> **Note:** These credentials are automatically created when running `php artisan db:seed`.
 
 ### 6. Useful Docker commands
 ```bash
@@ -407,15 +417,14 @@ laravel-vue-lms-blueprint/
 
 ---
 
-## 🔒 Security
+## 🔒 Security & Production Data Leak Prevention
 
-This blueprint addresses the following security concerns:
-- CORS configured to specific allowed origins (not `*` in production)
-- API rate limiting middleware enabled
-- Input validation via Laravel Form Requests
-- SQL injection prevention via Eloquent ORM
-- XSS protection via DOMPurify on the frontend
-- Secrets managed via environment variables (never committed)
+This blueprint is hardened to ensure **zero data leaks in production**, even when hosted on free deployment tiers (e.g. Supabase, Vercel, Render, Fly.io):
+- **CORS Scoping (`config/cors.php`):** Dynamically bound to `CORS_ALLOWED_ORIGINS` / `FRONTEND_URL` and wildcard deployment patterns (`*.vercel.app`, `*.netlify.app`), avoiding wildcard credentials vulnerabilities.
+- **Sanitized Exception Handling:** When `APP_DEBUG=false`, API error responses return generic user-friendly messages rather than exposing database table names, SQL queries, or server environment traces.
+- **Protected User Attributes & Safe Search (`User.php`):** Sensitive columns (`password`, `remember_token`) are hidden from JSON output, and search queries strictly target public columns (`id`, `fullname`, `email`, `phone`) to prevent hash-matching attacks.
+- **XSS & Input Sanitization:** DOMPurify sanitizes rich-text user inputs on the frontend, and Form Requests validate all API parameters.
+- **Strict Secrets Management:** All API keys, DB credentials, and tokens are read exclusively from environment variables and excluded from version control via `.gitignore`.
 
 See [lms-backend/SECURITY.md](lms-backend/SECURITY.md) for the full security audit report.
 

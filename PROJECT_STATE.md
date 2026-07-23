@@ -10,13 +10,13 @@ Production-grade Learning Management System (LMS) blueprint designed for scaled 
 | Layer | Technology | Key Details & Configurations |
 |---|---|---|
 | **Backend Framework** | Laravel `^8.75` (PHP `^7.3 \| ^8.0`) | RESTful API controllers (`App\Http\Controllers\API`), Eloquent ORM, Form Requests, Sanctum Auth |
-| **Frontend Framework** | Vue.js `^2.6.14` | SPA powered by Vue CLI 5, JavaScript ES6+, Options API |
+| **Frontend Framework** | Vue.js `^2.6.14` | SPA powered by Vue CLI 5, JavaScript ES6+, Options API, Vercel SPA Routing (`vercel.json`) |
 | **UI Library** | Vuetify `^2.6.0` | Material Design UI framework with custom SASS configuration |
-| **Database** | MySQL `8.0` / PostgreSQL (Supabase) | Dual-driver support for local MySQL 8.0 or cloud-hosted Supabase PostgreSQL |
+| **Database** | MySQL `8.0` / PostgreSQL (Supabase) | Dual-driver support for local MySQL 8.0 or cloud-hosted Supabase PostgreSQL (with SSL & pooler support) |
 | **Cache & Queue** | Redis `6.x` | Used for caching API responses, session storage, and processing asynchronous jobs |
 | **Authentication** | Laravel Sanctum `^2.15` | Bearer token authentication stored via HTTP-only cookies / local storage |
 | **Role & Permissions** | Spatie Laravel Permission `^5.5` | RBAC roles: `Super-Admin`, `Admin`, `Expert`, `Learner` |
-| **Reverse Proxy** | Nginx | Port 80 proxying `/api` to Laravel backend (port 8000) and `/` to Vue.js frontend (port 8080) |
+| **Reverse Proxy** | Nginx / Vercel Edge | Port 80 proxying `/api` to Laravel backend (port 8000) and `/` to Vue.js frontend (port 8080) |
 | **File Storage** | AWS S3 (`league/flysystem-aws-s3-v3` `^1.0`) | Presigned video streaming URLs and certificate asset storage |
 | **PDF & Exports** | `vue-html2pdf` `^1.8.0`, `json-to-csv-export` | Client-side certificate generation and admin CSV exports |
 | **Rich Text Editor** | CKEditor 5 (`@ckeditor/ckeditor5-vue2`) | Custom file upload handling via `CkeditorFileUploadController` |
@@ -25,7 +25,21 @@ Production-grade Learning Management System (LMS) blueprint designed for scaled 
 
 ---
 
-## 2. PROJECT STRUCTURE & ARCHITECTURE
+## 2. RECRUITER & DEMO ACCESS CREDENTIALS
+
+For evaluators, recruiters, and QA testing the live deployment or local database seed (`php artisan db:seed`), pre-seeded demo accounts are available:
+
+| Role / Persona | Email | Password | Access Capabilities |
+|---|---|---|---|
+| **Recruiter / Evaluator (Admin View)** | `recruiter@email.com` | `Password123123` | Full admin dashboard, user management, course/exam builder, analytics export |
+| **Super Admin (System View)** | `superadmin@email.com` | `Password123123` | System configuration, admin creation, full RBAC control |
+| **Demo Learner (Student View)** | `learner@email.com` | `Password123123` | Course catalog enrollment, video lesson player, quiz & exam engine, PDF certificate verification |
+
+> **Note:** Seeded automatically via `DatabaseSeeder.php` and `php artisan create:superadmin`.
+
+---
+
+## 3. PROJECT STRUCTURE & ARCHITECTURE
 
 ### Directory Structure Overview
 ```
@@ -47,6 +61,7 @@ laravel-vue-lms-blueprint/
 │   └── tests/                      # PHPUnit API test suite
 └── lms-frontend/
     └── startup-campus/             # Vue.js 2 SPA project root
+        ├── vercel.json             # Vercel rewrite configuration for SPA fallback routing
         └── src/
             ├── components/         # Shared Vuetify components (Navbar, Footer, Modals, Loaders)
             ├── views/
@@ -59,14 +74,33 @@ laravel-vue-lms-blueprint/
 
 ### Architectural Patterns Applied
 1. **Decoupled Client-Server (REST API Monorepo):** Backend serves strict JSON API endpoints under `/v1/`, completely isolated from Vue SPA presentation.
-2. **Reverse Proxy Routing:** Nginx handles request routing between SPA static bundle and backend API, preventing cross-origin issues in production.
+2. **Reverse Proxy & SPA Rewrite:** Nginx handles request routing locally (`/api` -> API, `/` -> SPA). Vercel edge rewrite (`vercel.json`) handles production SPA route fallbacks.
 3. **Eager Loading & Compound Indexing:** Database queries rely on explicit Eloquent `with()` eager loading and compound SQL indexes (`idx_progress_user_course`, `idx_enrollment_status`) to prevent N+1 query bottlenecks.
 4. **RBAC Guarding:** Dual-layer security using Spatie middleware (`role:Super-Admin`) on API routes and Vue Router navigation guards on client-side views.
 5. **State & Storage Abstraction:** Stateless authentication tokens stored securely, with presigned AWS S3 URLs used for sensitive media delivery.
 
 ---
 
-## 3. CURRENT IMPLEMENTATION STATE & DATA FLOW
+## 4. PRODUCTION SECURITY & ZERO DATA LEAK STANDARDS
+
+To guarantee security best practices and eliminate data leaks in production (especially on free deployment tiers like Vercel, Supabase, Render, Fly.io):
+
+1. **Strict Origin CORS Scoping (`config/cors.php`):**
+   - Configured dynamically via `CORS_ALLOWED_ORIGINS` / `FRONTEND_URL` rather than wildcard `*` when credentials are supported.
+   - Includes preview domain patterns (`*.vercel.app`, `*.netlify.app`, `*.onrender.com`).
+2. **Sanitized Exception Handling (`BaseController::ressException`):**
+   - In production (`APP_DEBUG=false`), API errors return clean, generic messages to clients (`An unexpected server error occurred.`), preventing SQL queries, stack traces, or database connection strings from leaking.
+3. **Model Attribute Protection & Safe Search (`User.php`):**
+   - Sensitive attributes (`password`, `remember_token`) are strictly hidden from JSON serialization.
+   - `scopeSearch` explicitly filters non-sensitive columns (`id`, `fullname`, `email`, `phone`), eliminating potential hash-matching searches against the password column.
+4. **Zero Frontend Secret Exposure:**
+   - Client JS bundle built strictly with public `VUE_APP_` variables. AWS S3 secret keys and DB credentials remain server-side only.
+5. **Environment Isolation:**
+   - `.env` files are untracked in git (`.gitignore`), preventing credential leaks in open repositories.
+
+---
+
+## 5. CURRENT IMPLEMENTATION STATE & DATA FLOW
 
 ### Primary Built Modules & Active Features
 - **Auth & Identity:** Register, Login, Email OTP verification, Password Reset, User Profile management with avatar uploads.
@@ -84,16 +118,9 @@ laravel-vue-lms-blueprint/
 - **Exam Domain:** `exams`, `exam_pages`, `question_banks`, `exam_configs`, `exam_poins` (scores & attempts), `exam_answers`.
 - **Certificates & Vouchers:** `certificates`, `vouchers`.
 
-### Critical Data Flow: Course Completion to Certificate
-1. Learner marks final lesson/quiz complete (`POST /v1/user-lesson/create` or submits exam via `POST /v1/exam-answer/create`).
-2. Backend calculates exam score in `ExamPoinController` against `exams.kkm` (passing threshold).
-3. Upon passing all requirements, learner triggers certificate request `POST /v1/certificate/create`.
-4. Backend verifies completion, writes `certificates` row with unique verification identifier, and returns payload.
-5. Frontend mounts `vue-html2pdf` view, embeds student details and QR code pointing to public verification endpoint `/v1/certificate/read/{id}`.
-
 ---
 
-## 4. REMAINING TASKS, TODOs & TECHNICAL DEBT
+## 6. REMAINING TASKS, TODOs & TECHNICAL DEBT
 
 ### Pending Enhancements & Technical Debt
 - **Framework Modernization:** Upgrade Laravel from `8.x` to `10.x/11.x` and PHP from `7.3/8.0` to `8.2+` to leverage modern type hints, Enums, and Fiber support.
@@ -104,7 +131,7 @@ laravel-vue-lms-blueprint/
 
 ---
 
-## 5. AI AGENT CODING GUIDELINES
+## 7. AI AGENT CODING GUIDELINES
 
 ### Naming Conventions & Placement Rules
 - **Backend Controllers:** Place API controllers in `lms-backend/app/Http/Controllers/API/`. Name using `[Domain]Controller.php` (e.g., `CourseController.php`).
