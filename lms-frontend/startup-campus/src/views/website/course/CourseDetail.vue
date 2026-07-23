@@ -804,11 +804,13 @@ export default {
     this.userId = this.$root.userId();
     if (this.$root.token()) {
       if (id) {
-        await this.getCourse(id);
-        await this.getLesson(id);
-        await this.getExam(id);
-        await this.readCourse(id);
-        await this.getTimeExam();
+        await Promise.all([
+          this.getCourse(id),
+          this.getLesson(id),
+          this.getExam(id),
+          this.readCourse(id),
+          this.getTimeExam(),
+        ]);
         this.prakerjaData = JSON.parse(localStorage.getItem("prakerjaData"));
       }
     }
