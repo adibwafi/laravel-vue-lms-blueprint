@@ -12,9 +12,9 @@
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^41.0.0",
     "@ckeditor/ckeditor5-vue2": "^3.0.1",
-    "axios": "^0.27.2",
+    "axios": "^0.34.0",
     "core-js": "^3.8.3",
-    "dompurify": "^3.0.6",
+    "dompurify": "^3.4.16",
     "json-to-csv-export": "^2.1.1",
     "lodash.debounce": "^4.0.8",
     "moment": "^2.29.4",
@@ -31,7 +31,7 @@
     "vuetify": "^2.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
+    "@babel/core": "^7.29.7",
     "@babel/eslint-parser": "^7.12.16",
     "@types/body-parser": "^1.19.5",
     "@types/dompurify": "^3.0.5",
